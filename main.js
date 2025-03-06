@@ -97,24 +97,32 @@ function init() {
     // }, undefined, (error) => {
     //     console.error(error);
     // });
-    
-    modelStrings.forEach((modelPath) => {
-        loader.load(modelPath, (gltf) => {
-            const model = gltf.scene;
-            model.position.set(-822875*s, y, 816500*s);
-            model.scale.set(s, s, s);
-            model.traverse((child) => {
-                if (child.isMesh) {
-                    child.material.polygonOffset = true;
-                    child.material.polygonOffsetFactor = 10;
-                    child.material.polygonOffsetUnits = 10; 
-                }
+    let round = 0;
+    while (modelStrings.length > 0) {
+        console.log("round:" + round);
+        let failedStrings = []
+        modelStrings.forEach((modelPath) => {
+            loader.load(modelPath, (gltf) => {
+                const model = gltf.scene;
+                model.position.set(-822875*s, y, 816500*s);
+                model.scale.set(s, s, s);
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                        child.material.polygonOffset = true;
+                        child.material.polygonOffsetFactor = 10;
+                        child.material.polygonOffsetUnits = 10; 
+                    }
+                });
+                scene.add(model);
+            }, undefined, (error) => {
+                failedStrings.push(modelPath);
+                console.error(error);
             });
-            scene.add(model);
-        }, undefined, (error) => {
-            console.error(error);
         });
-    });
+        round += 1;
+        modelStrings = failedStrings;
+    }
+    
     /*
     loader.load('./10-SE-6A/TERRAIN(TB)/T22500162000106E10/T22500162000106E10.gltf', (gltf) => {
         scene.add(gltf.scene);
