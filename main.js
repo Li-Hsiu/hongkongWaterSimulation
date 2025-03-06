@@ -36,31 +36,6 @@ function init() {
 
     loadingManager = new THREE.LoadingManager();
     loadingManager.onLoad = function () {
-        if (modelStrings.length > 0) {
-            while (modelStrings.length > 0) {
-                console.log("round: 0");
-                let failedStrings = []
-                modelStrings.forEach((modelPath) => {
-                    loader.load(modelPath, (gltf) => {
-                        const model = gltf.scene;
-                        model.position.set(-822875*s, y, 816500*s);
-                        model.scale.set(s, s, s);
-                        model.traverse((child) => {
-                            if (child.isMesh) {
-                                child.material.polygonOffset = true;
-                                child.material.polygonOffsetFactor = 10;
-                                child.material.polygonOffsetUnits = 10; 
-                            }
-                        });
-                        scene.add(model);
-                    }, undefined, (error) => {
-                        failedStrings.push(modelPath);
-                        console.error(error);
-                    });
-                });
-                modelStrings = failedStrings;
-            }
-        }
         console.log("Finished Loading!")
         isLoaded = true;
     };
@@ -96,7 +71,7 @@ function init() {
     sky = new Sky();
     sky.scale.setScalar( 450000 );
 
-    phi = 60.0 / 180.0 * Math.PI;
+    phi = Math.PI * 1.5;
     const theta = 180.0 / 180.0 * Math.PI;
     const sunPosition = new THREE.Vector3().setFromSphericalCoords( 1, phi, theta );
     sky.material.uniforms.sunPosition.value = sunPosition;
@@ -122,30 +97,24 @@ function init() {
     // }, undefined, (error) => {
     //     console.error(error);
     // });
-    while (modelStrings.length > 0) {
-        console.log("round: 0");
-        let failedStrings = []
-        modelStrings.forEach((modelPath) => {
-            loader.load(modelPath, (gltf) => {
-                const model = gltf.scene;
-                model.position.set(-822875*s, y, 816500*s);
-                model.scale.set(s, s, s);
-                model.traverse((child) => {
-                    if (child.isMesh) {
-                        child.material.polygonOffset = true;
-                        child.material.polygonOffsetFactor = 10;
-                        child.material.polygonOffsetUnits = 10; 
-                    }
-                });
-                scene.add(model);
-            }, undefined, (error) => {
-                failedStrings.push(modelPath);
-                console.error(error);
-            });
-        });
-        modelStrings = failedStrings;
-    }
     
+    modelStrings.forEach((modelPath) => {
+        loader.load(modelPath, (gltf) => {
+            const model = gltf.scene;
+            model.position.set(-822875*s, y, 816500*s);
+            model.scale.set(s, s, s);
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.material.polygonOffset = true;
+                    child.material.polygonOffsetFactor = 10;
+                    child.material.polygonOffsetUnits = 10; 
+                }
+            });
+            scene.add(model);
+        }, undefined, (error) => {
+            console.error(error);
+        });
+    });
     /*
     loader.load('./10-SE-6A/TERRAIN(TB)/T22500162000106E10/T22500162000106E10.gltf', (gltf) => {
         scene.add(gltf.scene);
@@ -199,6 +168,10 @@ function update() {
         //oceanSurface.timeChange((currentTime - lastTime) / 1000 || 0.0);
         controls.update((currentTime - lastTime) / 10);
         phi += ((currentTime - lastTime) / 100) / 180.0 * Math.PI;
+        console.log(phi);
+        if (phi > Math.PI * 2.8) {
+            phi = Math.PI * 1.2;
+        }
         lastTime = currentTime;
 
         
